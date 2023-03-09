@@ -1,0 +1,148 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int MAX_SIZE = 10;
+
+// Hàm tạo bản đồ mìn ngẫu nhiên
+void generateMap(int map[MAX_SIZE][MAX_SIZE], int m, int n, int k) {
+    // Khởi tạo bản đồ với tất cả các ô có giá trị là 0
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            map[i][j] = 0;
+        }
+    }
+
+    // Đặt k quả mìn ngẫu nhiên trên bản đồ
+    srand(time(NULL));
+    int count = 0;
+    while (count < k) {
+        int i = rand() % m;
+        int j = rand() % n;
+        if (map[i][j] != -1) {
+            map[i][j] = -1;
+            count++;
+        }
+    }
+}
+
+// Hàm kiểm tra tọa độ (i, j) có hợp lệ trên bản đồ hay không
+bool isValid(int i, int j, int m, int n) {
+    return i >= 0 && i < m && j >= 0 && j < n;
+}
+
+// Hàm đếm số quả mìn trong 8 ô xung quanh tọa độ (i, j)
+int countMines(int map[MAX_SIZE][MAX_SIZE], int m, int n, int i, int j) {
+    int count = 0;
+    for (int x = i - 1; x <= i + 1; x++) {
+        for (int y = j - 1; y <= j + 1; y++) {
+            if (isValid(x, y, m, n) && map[x][y] == -1) {
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
+int main() {
+    int m, n, k;
+    int map[MAX_SIZE][MAX_SIZE];
+    bool revealed[MAX_SIZE][MAX_SIZE];
+
+    // Nhập kích thước bản đồ và số quả mìn
+    cout << "Enter the size of the map (m, n): ";
+    cin >> m >> n;
+    cout << "Enter the number of mines: ";
+    cin >> k;
+
+    // Tạo bản đồ mìn
+    generateMap(map, m, n, k);
+
+    // Khởi tạo trạng thái của các ô trên bản đồ chưa được mở
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            revealed[i][j] = false;
+        }
+    }
+
+    bool gameOver = false;
+
+    // Vòng lặp chính của trò chơi
+    while (!gameOver) {
+        // Hiển thị bản đồ trên màn hình
+        cout << "   ";
+        for (int j = 0; j < n; j++) {
+            cout << j << " ";
+        }
+        cout << endl;
+        for (int i = 0; i < m; i++) {
+        cout << i << " |";
+        for (int j = 0; j < n; j++) {
+            if (revealed[i][j]) {
+                if (map[i][j] == -1) {
+                    cout << "* ";
+                } else {
+                    cout << countMines(map, m, n, i, j) << " ";
+                }
+            } else {
+                cout << ". ";
+            }
+        }
+        cout << endl;
+    }
+
+    // Nhập tọa độ của ô muốn mở
+    int x, y;
+    cout << "Enter the coordinates of the cell you want to open: ";
+    cin >> x >> y;
+
+    // Kiểm tra tọa độ vừa nhập có hợp lệ hay không
+    if (!isValid(x, y, m, n)) {
+        cout << "Invalid coordinates! Please try again." << endl;
+        continue;
+    }
+
+    // Kiểm tra ô đã được mở trước đó hay chưa
+    if (revealed[x][y]) {
+        cout << "This cell has already been opened! Please try again." << endl;
+        continue;
+    }
+
+    // Mở ô vừa chọn
+    revealed[x][y] = true;
+
+    // Kiểm tra ô vừa chọn có quả mìn hay không
+    if (map[x][y] == -1) {
+        // Hiển thị tất cả các quả mìn trên bản đồ và kết thúc trò chơi
+        cout << "YOU'RE DEAD!" << endl;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (map[i][j] == -1) {
+                    cout << "* ";
+                } else {
+                    cout << countMines(map, m, n, i, j) << " ";
+                }
+            }
+            cout << endl;
+        }
+        gameOver = true;
+    } else {
+        // Hiển thị bản đồ với các ô đã mở và số mìn xung quanh mỗi ô
+        int count = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (revealed[i][j]) {
+                    count++;
+                }
+            }
+        }
+        if (count == m * n - k) {
+            cout << "CONGRATULATIONS! YOU WIN!" << endl;
+            gameOver = true;
+        }
+    }
+}
+
+return 0;
+
+}
